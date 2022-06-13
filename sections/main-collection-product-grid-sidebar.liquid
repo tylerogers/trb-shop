@@ -1,0 +1,235 @@
+{{ 'template-collection.css' | asset_url | stylesheet_tag }}
+{{ 'component-loading-overlay.css' | asset_url | stylesheet_tag }}
+{{ 'component-card.css' | asset_url | stylesheet_tag }}
+{{ 'component-price.css' | asset_url | stylesheet_tag }}
+{{ 'component-product-grid.css' | asset_url | stylesheet_tag }}
+
+<link rel="preload" href="{{ 'component-rte.css' | asset_url }}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+
+<noscript>{{ 'component-rte.css' | asset_url | stylesheet_tag }}</noscript>
+
+<script src="{{ 'collection-filters-form.js' | asset_url }}" defer="defer"></script>
+{%- paginate collection.products by section.settings.products_per_page -%}
+
+{% liquid 
+  case section.settings.products_per_row
+     when 2
+       assign grid_item_width = 'col-lg-6'
+     when 3
+       assign grid_item_width = 'col-sm-6 col-md-4 col-lg-4'
+     when 4
+       assign grid_item_width = 'col-sm-6 col-md-3 col-lg-3'
+  endcase
+
+%}
+
+{%- if section.settings.sidebar_filter -%}
+  <div class="page-width">
+  <div class="grid-grid">
+{%- endif -%}
+
+{%- if section.settings.enable_filtering or section.settings.enable_sorting -%}
+  {%- if section.settings.sidebar_filter -%}
+    {% render 'collection-sidebar-filter' %}
+  {%- else -%}
+    {% render 'collection-horizontal-filter' %}
+  {%- endif -%}
+{%- endif -%}
+
+  <div class="{%- if section.settings.sidebar_filter -%}col-sm-12 col-md-9 col-lg-9{%- endif -%}">
+
+    {%- if section.settings.sidebar_filter -%}
+      <collection-filters-form class="facets small-hide right">
+        <form id="CollectionFiltersFormSort" class="facets__form">
+          {%- if section.settings.enable_sorting -%}
+            <div class="collection-filters__item sorting">
+              <div class="collection-filters__field">
+                <label class="collection-filters__label" for="SortBy">{{ 'sections.collection_template.sort_by_label' | t }}</label>
+                <div class="select">
+                  {%- assign sort_by = collection.sort_by | default: collection.default_sort_by -%}
+                  <select name="sort_by" class="select__select collection-filters__sort" id="SortBy" aria-describedby="a11y-refresh-page-message">
+                    {%- for option in collection.sort_options -%}
+                      <option value="{{ option.value | escape }}"{% if option.value == sort_by %} selected="selected"{% endif %}>{{ option.name | escape }}</option>
+                    {%- endfor -%}
+                  </select>
+                  {% render 'icon-caret' %}
+                </div>
+              </div>
+              <noscript>
+                <button type="submit" class="button button--small">{{ 'sections.collection_template.sort_button' | t }}</button>
+              </noscript>
+            </div>
+          {%- endif -%}
+        </form>
+      </collection-filters-form>
+    {%- endif -%}
+
+    <div id="CollectionProductGrid">
+        {%- if collection.products.size == 0 -%}
+          <div class="collection collection--empty page-width" id="main-collection-product-grid" data-id="{{ section.id }}">
+            <div class="loading-overlay">
+              <div class="loading-overlay__spinner">
+                <svg aria-hidden="true" focusable="false" role="presentation" class="spinner" viewBox="0 0 66 66" xmlns="http://www.w3.org/2000/svg">
+                  <circle class="path" fill="none" stroke-width="6" cx="33" cy="33" r="30"></circle>
+                </svg>
+              </div>
+            </div>
+            
+            {%- if section.settings.show_product_count -%}
+              <p class="collection-product-count light" role="status">
+                {{ 'sections.collection_template.product_count' | t: product_count: collection.products_count, count: collection.all_products_count }}
+              </p>
+            {%- endif -%}
+
+            <div class="title-wrapper center">
+              <h2 class="title title--primary">
+                {{ 'sections.collection_template.empty' | t }}<br>
+                {{ 'sections.collection_template.use_fewer_filters_html' | t: link: collection.url, class: "underlined-link link" }}
+              </h2>
+            </div>
+          </div>
+        {%- else -%}
+          <div class="collection {% unless section.settings.sidebar_filter %}page-width{% endunless %}">
+            <div class="loading-overlay">
+              <div class="loading-overlay__spinner">
+                <svg aria-hidden="true" focusable="false" role="presentation" class="spinner" viewBox="0 0 66 66" xmlns="http://www.w3.org/2000/svg">
+                  <circle class="path" fill="none" stroke-width="6" cx="33" cy="33" r="30"></circle>
+                </svg>
+              </div>
+            </div>
+            
+            {%- if section.settings.show_product_count -%}
+              <p class="collection-product-count light" role="status">
+                {{ 'sections.collection_template.product_count' | t: product_count: collection.products_count, count: collection.all_products_count }}
+              </p>
+            {%- endif -%}
+
+            <ul id="main-collection-product-grid" data-id="{{ section.id }}" class="grid-grid">
+              {%- for product in collection.products -%}
+                <li class="{{ grid_item_width }}">
+                  {% render 'product-card', product_card_product: product, media_size: section.settings.image_ratio, show_secondary_image: section.settings.show_secondary_image, add_image_padding: section.settings.add_image_padding, show_vendor: section.settings.show_vendor, show_image_outline: section.settings.show_image_outline %}
+                </li>
+              {%- endfor -%}
+            </ul>
+          </div>
+        {%- endif -%}
+      
+    </div>
+
+  </div>
+{%- if section.settings.sidebar_filter -%}
+  </div>
+  </div>
+{%- endif -%}
+
+  {%- if paginate.pages > 1 -%}
+    <div class="page-width">
+      {% render 'pagination', paginate: paginate, anchor: '' %}
+    </div>
+  {%- endif -%}
+
+{%- endpaginate -%}
+
+{% schema %}
+{
+  "name": "t:sections.main-collection-product-grid.name",
+  "class": "spaced-section collection-grid-section",
+  "settings": [
+    {
+      "type": "range",
+      "id": "products_per_page",
+      "min": 8,
+      "max": 24,
+      "step": 1,
+      "default": 24,
+      "label": "t:sections.main-collection-product-grid.settings.products_per_page.label"
+    },
+    {
+      "type": "range",
+      "id": "products_per_row",
+      "min": 2,
+      "max": 4,
+      "step": 1,
+      "default": 3,
+      "label": "Products per row"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.main-collection-product-grid.settings.header__3.content"
+    },
+    {
+      "type": "select",
+      "id": "image_ratio",
+      "options": [
+        {
+          "value": "adapt",
+          "label": "t:sections.main-collection-product-grid.settings.image_ratio.options__1.label"
+        },
+        {
+          "value": "portrait",
+          "label": "t:sections.main-collection-product-grid.settings.image_ratio.options__2.label"
+        },
+        {
+          "value": "square",
+          "label": "t:sections.main-collection-product-grid.settings.image_ratio.options__3.label"
+        }
+      ],
+      "default": "adapt",
+      "label": "t:sections.main-collection-product-grid.settings.image_ratio.label"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_secondary_image",
+      "default": false,
+      "label": "t:sections.main-collection-product-grid.settings.show_secondary_image.label"
+    },
+    {
+      "type": "checkbox",
+      "id": "add_image_padding",
+      "default": false,
+      "label": "t:sections.main-collection-product-grid.settings.add_image_padding.label"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_image_outline",
+      "default": true,
+      "label": "t:sections.main-collection-product-grid.settings.show_image_outline.label"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_vendor",
+      "default": false,
+      "label": "t:sections.main-collection-product-grid.settings.show_vendor.label"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.main-collection-product-grid.settings.header__1.content"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_filtering",
+      "default": true,
+      "label": "t:sections.main-collection-product-grid.settings.enable_filtering.label",
+      "info": "t:sections.main-collection-product-grid.settings.enable_filtering.info"
+    },
+    {
+      "type": "checkbox",
+      "id": "sidebar_filter",
+      "default": true,
+      "label": "Show Filters as vertical sidebar."
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_sorting",
+      "default": true,
+      "label": "t:sections.main-collection-product-grid.settings.enable_sorting.label"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_product_count",
+      "default": false,
+      "label": "Show product count"
+    }
+  ]
+}
+{% endschema %}
