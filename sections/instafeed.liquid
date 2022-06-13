@@ -1,0 +1,41 @@
+
+<div class="page-width instagram-section">
+  <h2 class="text-center">{{ section.settings.instagram_title }}</h2>
+  <h6 class="text-center">
+    <a href=" {{ section.settings.instagram_subtitle_link }}" target="_blank">
+      {{ section.settings.instagram_subtitle }}
+    </a>
+  </h6>
+  
+  <div id="insta-feed"></div>
+</div>
+
+
+{%schema%}
+{
+  "name":"Instafeed App",
+  "settings": [
+    {
+      "type": "text",
+      "id": "instagram_title",
+      "label": "Instagram title"
+    },
+    {
+      "type": "text",
+      "id": "instagram_subtitle",
+      "label": "Instagram Subtitle"
+    },
+    {
+      "type": "url",
+      "id": "instagram_subtitle_link",
+      "label": "Instagram Subtitle Link"
+    }
+  ],
+  "presets":[
+    {
+      "name":"Instafeed App",
+      "category":"Instagram Feed"
+    }
+  ]
+}
+{%endschema%}

@@ -1,0 +1,224 @@
+{{ 'section-image-banner.css' | asset_url | stylesheet_tag }}
+<link rel="stylesheet" href="{{ 'component-slider.css' | asset_url }}" media="print" onload="this.media='all'">
+
+<noscript>{{ 'component-slider.css' | asset_url | stylesheet_tag }}</noscript>
+
+{%- if section.settings.adapt_height_first_image and section.settings.image != blank -%}
+  {%- style -%}
+    #Banner-{{ section.id }}::before, #Banner-{{ section.id }} .banner__media::before {
+      padding-bottom: {{ 1 | divided_by: section.settings.image.aspect_ratio | times: 100 }}%;
+      content: '';
+      display: block;
+    }
+  {%- endstyle -%}
+{%- endif -%}
+
+<div id="Banner-{{ section.id }}" class="banner-slider">
+  
+    <slider-component>
+      <ul class="slider slider--desktop grid" id="Slider-{{ section.id }}" role="list">
+        {%- for block in section.blocks -%}
+        <li class="grid__item slider__slide slider__slide--full-width">
+          {%- if block.settings.image != blank -%}
+            <div class="banner__media media">
+              <img srcset="{%- if block.settings.image.width >= 375 -%}{{ block.settings.image | img_url: '375x' }} 375w,{%- endif -%}
+                {%- if block.settings.image.width >= 750 -%}{{ block.settings.image | img_url: '750x' }} 750w,{%- endif -%}
+                {%- if block.settings.image.width >= 1100 -%}{{ block.settings.image | img_url: '1100x' }} 1100w,{%- endif -%}
+                {%- if block.settings.image.width >= 1500 -%}{{ block.settings.image | img_url: '1500x' }} 1500w,{%- endif -%}
+                {%- if block.settings.image.width >= 1780 -%}{{ block.settings.image | img_url: '1780x' }} 1780w,{%- endif -%}
+                {%- if block.settings.image.width >= 2000 -%}{{ block.settings.image | img_url: '2000x' }} 2000w,{%- endif -%}
+                {%- if block.settings.image.width >= 2800 -%}{{ block.settings.image | img_url: '2800x' }} 2800w{%- endif -%}"
+                sizes="100vw"
+                src="{{ block.settings.image | img_url: '750x' }}"
+                loading="lazy"
+                alt="{{ block.settings.image.alt | escape }}"
+                width="{{ block.settings.image.width }}"
+                height="{{ block.settings.image.width | divided_by: block.settings.image.aspect_ratio }}"
+              >
+            </div>
+          {%- endif -%}
+
+          <div class="banner__content page-width" style="align-items: {{ section.settings.desktop_text_box_position }};">
+            <div class="banner__box color-{{ section.settings.color_scheme }}">
+              
+                  {% if block.settings.heading != blank %}
+                    <h2 class="banner__heading h1">
+                      <span>{{ block.settings.heading | escape }}</span>
+                    </h2>
+                  {% endif %}
+                  {% if block.settings.text != blank %}
+                    <div class="banner__text">
+                      <span>{{ block.settings.text | escape }}</span>
+                    </div>
+                  {% endif %}
+                  {% if block.settings.button_label_1 != blank or block.settings.button_label_2 != blank %}
+                    <div class="banner__buttons{% if block.settings.button_label_1 != blank and block.settings.button_link_1 != blank and block.settings.button_label_2 != blank and block.settings.button_link_2 != blank %} banner__buttons--multiple{% endif %}">
+                      {%- if block.settings.button_label_1 != blank -%}
+                        <a href="{{ block.settings.button_link_1 }}" class="button{% if block.settings.button_style_secondary_1 %} button--secondary{% else %} button--primary{% endif %}"{% if block.settings.button_link_1 == blank %} aria-disabled="true"{% endif %}>{{ block.settings.button_label_1 | escape }}</a>
+                      {%- endif -%}
+                      {%- if block.settings.button_label_2 != blank -%}
+                        <a href="{{ block.settings.button_link_2 }}" class="button{% if block.settings.button_style_secondary_2 %} button--secondary{% else %} button--primary{% endif %}"{% if block.settings.button_link_2 == blank %} aria-disabled="true"{% endif %}>{{ block.settings.button_label_2 | escape }}</a>
+                      {%- endif -%}
+                    </div>
+                  {% endif %}
+
+            </div>
+          </div>
+        </li>
+        {%- endfor -%}
+      </ul>
+
+      {%- if section.blocks.size > 1 -%}
+        <div class="slider-buttons no-js-hidden">
+          <div class="slider-counter caption">
+            <span class="slider-counter--current">1</span>
+            <span aria-hidden="true"> / </span>
+            <span class="visually-hidden">{{ 'accessibility.of' | t }}</span>
+            <span class="slider-counter--total">{{ section.blocks.size }}</span>
+          </div>
+          <button type="button" class="slider-button slider-button--prev" name="previous" aria-label="{{ 'accessibility.previous_slide' | t }}">{% render 'icon-caret' %}</button>
+          <button type="button" class="slider-button slider-button--next" name="next" aria-label="{{ 'accessibility.next_slide' | t }}">{% render 'icon-caret' %}</button>
+        </div>
+      {%- endif -%}
+      
+    </slider-component>
+  
+</div>
+
+{% schema %}
+{
+  "name": "Image Banner Slider",
+  "tag": "section",
+  "class": "spaced-section spaced-section--full-width",
+  "settings": [
+    {
+      "type": "select",
+      "id": "desktop_text_box_position",
+      "options": [
+        {
+          "value": "flex-start",
+          "label": "t:sections.image-banner.settings.desktop_text_box_position.options__1.label"
+        },
+        {
+          "value": "center",
+          "label": "t:sections.image-banner.settings.desktop_text_box_position.options__2.label"
+        },
+        {
+          "value": "flex-end",
+          "label": "t:sections.image-banner.settings.desktop_text_box_position.options__3.label"
+        }
+      ],
+      "default": "center",
+      "label": "t:sections.image-banner.settings.desktop_text_box_position.label"
+    },
+    {
+      "type": "select",
+      "id": "color_scheme",
+      "options": [
+        {
+          "value": "accent-1",
+          "label": "t:sections.image-banner.settings.color_scheme.options__1.label"
+        },
+        {
+          "value": "accent-2",
+          "label": "t:sections.image-banner.settings.color_scheme.options__2.label"
+        },
+        {
+          "value": "background-1",
+          "label": "t:sections.image-banner.settings.color_scheme.options__3.label"
+        },
+        {
+          "value": "background-2",
+          "label": "t:sections.image-banner.settings.color_scheme.options__4.label"
+        },
+        {
+          "value": "inverse",
+          "label": "t:sections.image-banner.settings.color_scheme.options__5.label"
+        }
+      ],
+      "default": "background-1",
+      "label": "t:sections.image-banner.settings.color_scheme.label"
+    },
+    {
+      "type": "checkbox",
+      "id": "adapt_height_first_image",
+      "default": false,
+      "label": "t:sections.image-banner.settings.adapt_height_first_image.label"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "slide",
+      "name": "Slide",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "t:sections.image-banner.settings.image.label"
+        },
+        {
+          "type": "text",
+          "id": "heading",
+          "default": "Image banner",
+          "label": "t:sections.image-banner.blocks.heading.settings.heading.label"
+        },
+        {
+          "type": "text",
+          "id": "text",
+          "default": "Give customers details about the banner image(s) or content on the template.",
+          "label": "t:sections.image-banner.blocks.text.settings.text.label"
+        },
+        {
+          "type": "text",
+          "id": "button_label_1",
+          "default": "Button label",
+          "label": "t:sections.image-banner.blocks.buttons.settings.button_label_1.label",
+          "info": "t:sections.image-banner.blocks.buttons.settings.button_label_1.info"
+        },
+        {
+          "type": "url",
+          "id": "button_link_1",
+          "label": "t:sections.image-banner.blocks.buttons.settings.button_link_1.label"
+        },
+        {
+          "type": "checkbox",
+          "id": "button_style_secondary_1",
+          "default": false,
+          "label": "t:sections.image-banner.blocks.buttons.settings.button_style_secondary_1.label"
+        },
+        {
+          "type": "text",
+          "id": "button_label_2",
+          "default": "Button label",
+          "label": "t:sections.image-banner.blocks.buttons.settings.button_label_2.label",
+          "info": "t:sections.image-banner.blocks.buttons.settings.button_label_2.info"
+        },
+        {
+          "type": "url",
+          "id": "button_link_2",
+          "label": "t:sections.image-banner.blocks.buttons.settings.button_link_2.label"
+        },
+        {
+          "type": "checkbox",
+          "id": "button_style_secondary_2",
+          "default": false,
+          "label": "t:sections.image-banner.blocks.buttons.settings.button_style_secondary_2.label"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Image Banner Slider",
+      "blocks": [
+        {
+          "type": "slide"
+        },
+        {
+          "type": "slide"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
